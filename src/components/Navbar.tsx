@@ -5,10 +5,17 @@ import { CalendarIcon, CrownIcon, HomeIcon, MicIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 function Navbar() {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  // Only render user info on client-side after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-2 border-b border-border/50 bg-background/80 backdrop-blur-md h-16">
@@ -66,14 +73,16 @@ function Navbar() {
         {/* RIGHT SECTION */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3">
-            <div className="hidden lg:flex flex-col items-end">
-              <span className="text-sm font-medium text-foreground">
-                {user?.firstName} {user?.lastName}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {user?.emailAddresses?.[0]?.emailAddress}
-              </span>
-            </div>
+            {mounted && isLoaded && user && (
+              <div className="hidden lg:flex flex-col items-end">
+                <span className="text-sm font-medium text-foreground">
+                  {user.firstName} {user.lastName}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {user.emailAddresses?.[0]?.emailAddress}
+                </span>
+              </div>
+            )}
 
             <UserButton />
           </div>
