@@ -6,16 +6,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Badge } from "./ui/badge";
 
 function Navbar() {
   const { user, isLoaded } = useUser();
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
 
-  // Only render user info on client-side after mount
+  // ✅ Only render on client after mount
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const isPro = user?.publicMetadata?.isPro === true;
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-2 border-b border-border/50 bg-background/80 backdrop-blur-md h-16">
@@ -57,7 +60,13 @@ function Navbar() {
             >
               <MicIcon className="w-4 h-4" />
               <span className="hidden md:inline">Voice</span>
+              {mounted && isPro && (
+                <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-[10px]">
+                  PRO
+                </Badge>
+              )}
             </Link>
+
             <Link
               href="/pro"
               className={`flex items-center gap-2 transition-colors hover:text-foreground ${
@@ -75,20 +84,30 @@ function Navbar() {
           <div className="flex items-center gap-3">
             {mounted && isLoaded && user && (
               <div className="hidden lg:flex flex-col items-end">
-                <span className="text-sm font-medium text-foreground">
-                  {user.firstName} {user.lastName}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-foreground">
+                    {user.firstName} {user.lastName}
+                  </span>
+                  {isPro && (
+                    <Badge className="bg-gradient-to-r from-amber-500 to-amber-600">
+                      <CrownIcon className="w-3 h-3 mr-1" />
+                      PRO
+                    </Badge>
+                  )}
+                </div>
                 <span className="text-xs text-muted-foreground">
                   {user.emailAddresses?.[0]?.emailAddress}
                 </span>
               </div>
             )}
 
-            <UserButton />
+            {/* ✅ Only render UserButton after mounted */}
+            {mounted && <UserButton />}
           </div>
         </div>
       </div>
     </nav>
   );
 }
+
 export default Navbar;

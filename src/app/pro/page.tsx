@@ -3,6 +3,7 @@ import PricingSection from "@/components/PricingSection";
 import { currentUser } from "@clerk/nextjs/server";
 import { CrownIcon } from "lucide-react";
 import { redirect } from "next/navigation";
+import TestProUpgrade from "@/components/TestProUpgrade";
 
 async function ProPage() {
   const user = await currentUser();
@@ -52,6 +53,7 @@ async function ProPage() {
           <PricingSection />
         </div>
       </div>
+      <TestProUpgrade />
     </>
   );
 }
