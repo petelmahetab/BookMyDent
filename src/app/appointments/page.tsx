@@ -13,12 +13,12 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 function AppointmentsPage() {
-  // state management for the booking process - this could be done with something like Zustand for larger apps
+  // state management for the booking process
   const [selectedDentistId, setSelectedDentistId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [selectedType, setSelectedType] = useState("");
-  const [currentStep, setCurrentStep] = useState(1); // 1: select dentist, 2: select time, 3: confirm
+  const [currentStep, setCurrentStep] = useState(1);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [bookedAppointment, setBookedAppointment] = useState<any>(null);
 
@@ -48,6 +48,7 @@ function AppointmentsPage() {
         date: selectedDate,
         time: selectedTime,
         reason: appointmentType?.name,
+        // ✅ NO NEED TO PASS patientEmail - it comes from User table!
       },
       {
         onSuccess: async (appointment) => {
@@ -55,13 +56,14 @@ function AppointmentsPage() {
           setBookedAppointment(appointment);
 
           try {
+            // ✅ appointment already has patientEmail from transformAppointment function
             const emailResponse = await fetch("/api/send-appointment-email", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                userEmail: appointment.patientEmail,
+                userEmail: appointment.patientEmail, // ✅ This already exists from User table
                 doctorName: appointment.doctorName,
                 appointmentDate: format(new Date(appointment.date), "EEEE, MMMM d, yyyy"),
                 appointmentTime: appointment.time,
@@ -71,9 +73,15 @@ function AppointmentsPage() {
               }),
             });
 
-            if (!emailResponse.ok) console.error("Failed to send confirmation email");
+            if (!emailResponse.ok) {
+              console.error("Failed to send confirmation email");
+              toast.error("Appointment booked, but email notification failed");
+            } else {
+              toast.success("Appointment booked! Check your email for confirmation.");
+            }
           } catch (error) {
             console.error("Error sending confirmation email:", error);
+            toast.error("Appointment booked, but email notification failed");
           }
 
           // show the success modal
@@ -148,7 +156,7 @@ function AppointmentsPage() {
             doctorName: bookedAppointment.doctorName,
             appointmentDate: format(new Date(bookedAppointment.date), "EEEE, MMMM d, yyyy"),
             appointmentTime: bookedAppointment.time,
-            userEmail: bookedAppointment.patientEmail,
+            userEmail: bookedAppointment.patientEmail, // ✅ Already exists from User table
           }}
         />
       )}

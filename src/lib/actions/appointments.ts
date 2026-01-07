@@ -121,6 +121,7 @@ interface BookAppointmentInput {
   date: string;
   time: string;
   reason?: string;
+  patientEmail?: string; // ✅ ADD THIS - Make it optional for now
 }
 
 export async function bookAppointment(input: BookAppointmentInput) {
